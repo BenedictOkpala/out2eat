@@ -15,7 +15,7 @@
     "test": "node --test \"scripts/*.test.mjs\"",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test:dining": "node --experimental-strip-types --test tests/dinner.test.ts tests/qloo-client.test.ts tests/dinner-suitability.test.ts tests/ui-id.test.ts tests/dinner-agent.test.ts tests/usage.test.ts",
+    "test:dining": "node --experimental-strip-types --test tests/dinner.test.ts tests/qloo-client.test.ts tests/dinner-suitability.test.ts tests/ui-id.test.ts tests/dinner-agent.test.ts tests/usage.test.ts tests/qloo-spacing.test.ts",
     "verify:qloo": "node scripts/verify-qloo.mjs",
     "check:public": "node scripts/check-public-release.mjs"
   },

@@ -67,19 +67,19 @@ for i,key in ipairs(KEYS) do
   if redis.call('GET',key..':window')==ARGV[i] and tonumber(redis.call('GET',key) or '0')>0 then redis.call('DECR',key) end
 end
 return 1`;
-function limited(key: string, resetAt: number): never {
+function limited(key: string, resetAt: number, quietSpacing = false): never {
   const limiter = key.startsWith("caller:") ? `caller.${key.split(":").at(-1)}` : key.replaceAll(":", ".");
-  console.warn("Dining limiter rejected", JSON.stringify({limiter,resetAt:resetAt > 0 ? new Date(resetAt).toISOString() : null}));
+  if (!quietSpacing || limiter !== "provider.qloo.spacing") console.warn("Dining limiter rejected", JSON.stringify({limiter,resetAt:resetAt > 0 ? new Date(resetAt).toISOString() : null}));
   throw new UsageError("Dining usage limit reached. Please try again later.", {limiter,resetAt});
 }
-async function reserve(rows: { key: string; limit: number; ttl: number }[]): Promise<Reservation> {
+async function reserve(rows: { key: string; limit: number; ttl: number }[], quietSpacing = false): Promise<Reservation> {
   const shared = distributed();
   const keys = rows.map(r => `out2eat:v1:${r.key}`);
   let windows: string[];
   if (shared) {
     const result = await redis(["EVAL", LIMIT_SCRIPT, rows.length, ...keys, ...rows.flatMap(r => [r.limit, r.ttl]), randomUUID()]);
     if (!Array.isArray(result)) throw new UsageError("Invalid shared usage response.");
-    if (result[0] === 0 && rows[Number(result[1])-1]) limited(rows[Number(result[1])-1]!.key, Number(result[2]));
+    if (result[0] === 0 && rows[Number(result[1])-1]) limited(rows[Number(result[1])-1]!.key, Number(result[2]), quietSpacing);
     if (result[0] !== 1 || result.length !== rows.length+1 || result.slice(1).some(value => typeof value !== "string")) throw new UsageError("Invalid shared usage response.");
     windows = result.slice(1) as string[];
   } else {
@@ -119,10 +119,27 @@ export async function admitCaller(caller: string) {
 // Each actual attempt, including a Qloo retry, reserves a unit before fetch.
 // Fixed caps deliberately cannot be raised by public request arguments.
 export async function reserveProvider(provider: "model" | "qloo") {
-  const cooldown = await cacheRead<number>(`cooldown:${provider}`);
-  if (cooldown && cooldown > Date.now()) throw new UsageError(`Dining provider is rate limited. Retry after ${new Date(cooldown).toISOString()}.`, {limiter:`provider.${provider}.cooldown`,resetAt:cooldown});
-  return reserve([{key:`provider:${provider}:day`,limit:provider === "model" ? 100 : 300,ttl:86400},
-    ...(provider === "qloo" && distributed() ? [{key:"provider:qloo:spacing",limit:1,ttl:2}] : [])]);
+  const deadline = Date.now() + 15_000;
+  for (let attempt = 0; ; attempt++) {
+    // Recheck provider cooldowns after waiting: another instance may set one.
+    const cooldown = await cacheRead<number>(`cooldown:${provider}`);
+    if (cooldown && cooldown > Date.now()) throw new UsageError(`Dining provider is rate limited. Retry after ${new Date(cooldown).toISOString()}.`, {limiter:`provider.${provider}.cooldown`,resetAt:cooldown});
+    try {
+      return await reserve([{key:`provider:${provider}:day`,limit:provider === "model" ? 100 : 300,ttl:86400},
+        ...(provider === "qloo" && distributed() ? [{key:"provider:qloo:spacing",limit:1,ttl:2}] : [])], provider === "qloo");
+    } catch (error) {
+      if (!(error instanceof UsageError) || error.limiter !== "provider.qloo.spacing") throw error;
+      const delay = Math.max(25, (error.resetAt ?? 0) - Date.now() + 25);
+      // Only retry shared admission, never a provider request. Rejection is
+      // atomic and charges no daily unit. Bound both contention and total wait.
+      if (!error.resetAt || attempt >= 8 || Date.now() + delay > deadline) {
+        console.warn("Dining limiter rejected", JSON.stringify({limiter:error.limiter,resetAt:error.resetAt ? new Date(error.resetAt).toISOString() : null}));
+        throw error;
+      }
+      if (process.env.DINING_DIAGNOSTICS === "true") console.info("Dining Qloo spacing wait", JSON.stringify({waitMs:delay,attempt:attempt + 1,resetAt:new Date(error.resetAt).toISOString()}));
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
 }
 
 export async function recordQlooCooldown(until: number) {
