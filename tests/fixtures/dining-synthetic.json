@@ -1,0 +1,275 @@
+{
+  "synthetic": true,
+  "notice": "Hand-authored fictional test data. Not a recorded Qloo response. Never served as live results.",
+  "results": {
+    "entities": [
+      {
+        "entity_id": "synthetic-mutual",
+        "name": "TEST FIXTURE Mutual Dinner",
+        "location": {
+          "lat": 9.0861981,
+          "lon": 7.4759718
+        },
+        "tags": [
+          {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          {
+            "id": "urn:tag:cuisine:qloo:seafood",
+            "name": "Seafood",
+            "type": "urn:tag:cuisine:qloo"
+          },
+          {
+            "id": "urn:tag:cuisine:qloo:italian",
+            "name": "Italian",
+            "type": "urn:tag:cuisine:qloo"
+          },
+          {
+            "id": "urn:tag:offerings:place:wine",
+            "name": "Wine",
+            "type": "urn:tag:offerings:place"
+          },
+          {
+            "id": "urn:tag:ambience:qloo:quiet",
+            "name": "Quiet",
+            "type": "urn:tag:ambience:qloo"
+          },
+          {
+            "id": "urn:tag:category:place:food",
+            "name": "Food",
+            "type": "urn:tag:category:place"
+          }
+        ],
+        "properties": {
+          "price_level": 2,
+          "address": "1 Synthetic Test Street",
+          "primary_genre": {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          "image": {
+            "url": "https://example.com/synthetic-photo.jpg"
+          }
+        },
+        "query": {
+          "affinity": 0.9
+        }
+      },
+      {
+        "entity_id": "synthetic-mutual-alt",
+        "name": "TEST FIXTURE Mutual Alternative",
+        "location": {
+          "lat": 9.0861981,
+          "lon": 7.4759718
+        },
+        "tags": [
+          {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          {
+            "id": "urn:tag:cuisine:qloo:seafood",
+            "name": "Seafood",
+            "type": "urn:tag:cuisine:qloo"
+          },
+          {
+            "id": "urn:tag:cuisine:qloo:italian",
+            "name": "Italian",
+            "type": "urn:tag:cuisine:qloo"
+          },
+          {
+            "id": "urn:tag:ambience:qloo:quiet",
+            "name": "Quiet",
+            "type": "urn:tag:ambience:qloo"
+          }
+        ],
+        "properties": {
+          "price_level": 2,
+          "address": "1 Synthetic Test Street",
+          "primary_genre": {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          "image": {
+            "url": "https://example.com/synthetic-photo.jpg"
+          }
+        },
+        "query": {
+          "affinity": 0.5
+        }
+      },
+      {
+        "entity_id": "synthetic-partial",
+        "name": "TEST FIXTURE One-sided Dinner",
+        "location": {
+          "lat": 9.0861981,
+          "lon": 7.4759718
+        },
+        "tags": [
+          {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          {
+            "id": "urn:tag:cuisine:qloo:seafood",
+            "name": "Seafood",
+            "type": "urn:tag:cuisine:qloo"
+          }
+        ],
+        "properties": {
+          "price_level": 2,
+          "address": "1 Synthetic Test Street",
+          "primary_genre": {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          "image": {
+            "url": "https://example.com/synthetic-photo.jpg"
+          }
+        },
+        "query": {
+          "affinity": 0.8
+        }
+      },
+      {
+        "entity_id": "synthetic-wine",
+        "name": "TEST FIXTURE Wine Only",
+        "location": {
+          "lat": 9.0861981,
+          "lon": 7.4759718
+        },
+        "tags": [
+          {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          {
+            "id": "urn:tag:offerings:place:wine",
+            "name": "Wine",
+            "type": "urn:tag:offerings:place"
+          }
+        ],
+        "properties": {
+          "price_level": 2,
+          "address": "1 Synthetic Test Street",
+          "primary_genre": {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          "image": {
+            "url": "https://example.com/synthetic-photo.jpg"
+          }
+        },
+        "query": {
+          "affinity": 1
+        }
+      },
+      {
+        "entity_id": "synthetic-ice",
+        "name": "TEST FIXTURE Ice Cream",
+        "location": {
+          "lat": 9.0861981,
+          "lon": 7.4759718
+        },
+        "tags": [
+          {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          {
+            "id": "urn:tag:genre:place:restaurant:ice_cream_shop",
+            "name": "ice_cream_shop",
+            "type": "urn:tag:genre:place:restaurant"
+          }
+        ],
+        "properties": {
+          "price_level": 2,
+          "primary_genre": {
+            "id": "urn:tag:genre:place:restaurant:ice_cream_shop",
+            "name": "ice_cream_shop",
+            "type": "urn:tag:genre:place:restaurant"
+          }
+        },
+        "query": {
+          "affinity": 0.8
+        }
+      },
+      {
+        "entity_id": "synthetic-cake",
+        "name": "TEST FIXTURE Cake Shop",
+        "location": {
+          "lat": 9.0861981,
+          "lon": 7.4759718
+        },
+        "tags": [
+          {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          {
+            "id": "urn:tag:genre:place:restaurant:cake_shop",
+            "name": "cake_shop",
+            "type": "urn:tag:genre:place:restaurant"
+          }
+        ],
+        "properties": {
+          "price_level": 2,
+          "primary_genre": {
+            "id": "urn:tag:genre:place:restaurant:cake_shop",
+            "name": "cake_shop",
+            "type": "urn:tag:genre:place:restaurant"
+          }
+        },
+        "query": {
+          "affinity": 0.8
+        }
+      },
+      {
+        "entity_id": "synthetic-avoid",
+        "name": "TEST FIXTURE Avoided Fast Food",
+        "location": {
+          "lat": 9.0861981,
+          "lon": 7.4759718
+        },
+        "tags": [
+          {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          {
+            "id": "urn:tag:genre:place:restaurant:fast_food",
+            "name": "Fast food",
+            "type": "urn:tag:genre:place:restaurant"
+          }
+        ],
+        "properties": {
+          "price_level": 2,
+          "address": "1 Synthetic Test Street",
+          "primary_genre": {
+            "id": "urn:tag:genre:place:restaurant",
+            "name": "Restaurant",
+            "type": "urn:tag:genre:place"
+          },
+          "image": {
+            "url": "https://example.com/synthetic-photo.jpg"
+          }
+        },
+        "query": {
+          "affinity": 0.4
+        }
+      }
+    ]
+  }
+}

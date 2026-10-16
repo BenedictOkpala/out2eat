@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+
+  --color-bg: #f6f3ee;
+  --color-surface: #fffcf8;
+  --color-surface-2: #f3efe8;
+  --color-fg: #1c1917;
+  --color-muted: #6f675f;
+  --color-line: #e4ddd4;
+  --color-primary: #5c4d9a;
+  --color-primary-fg: #fffcf8;
+  --color-accent: #ece7f7;
+  --color-accent-fg: #3d3368;
+  --color-best: #f7f4fc;
+  --color-danger: #8c3d3d;
+  --color-danger-bg: #f8ecec;
+
+  --radius-card: 1.25rem;
+  --shadow-card:
+    0 0 0 1px rgba(28, 25, 23, 0.06),
+    0 1px 2px -1px rgba(28, 25, 23, 0.06),
+    0 10px 24px -16px rgba(28, 25, 23, 0.18);
+  --shadow-best:
+    0 0 0 1px rgba(92, 77, 154, 0.35),
+    0 12px 28px -16px rgba(92, 77, 154, 0.45);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  .app-shell {
+    display: flex;
+    height: 100dvh;
+    max-width: 28rem;
+    margin-inline: auto;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    background: var(--color-bg);
+  }
+
+  .card {
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-card);
+  }
+
+  .card-best {
+    background: var(--color-best);
+    box-shadow: var(--shadow-best);
+    border-radius: var(--radius-card);
+  }
+
+  .composer {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .tap {
+    transition: scale 150ms ease-out;
+  }
+
+  .tap:active:not(:disabled) {
+    scale: 0.96;
+  }
+
+  .rise {
+    animation: rise 420ms ease-out both;
+  }
+
+  .venue-photo {
+    outline: 1px solid rgba(28, 25, 23, 0.1);
+    outline-offset: -1px;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tap {
+    transition: none;
+  }
+
+  .rise {
+    animation: none;
+  }
+}

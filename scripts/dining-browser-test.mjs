@@ -1,0 +1,130 @@
+import { chromium } from 'playwright';
+import { toCrossJSONAsync } from 'seroval';
+import assert from 'node:assert/strict';
+import { writeFileSync } from 'node:fs';
+import { offlineBrowserAssets } from './offline-browser-assets.mjs';
+const base=process.argv[2] || 'http://127.0.0.1:8080/';
+const browser=await chromium.launch({headless:true, ...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+const page=await browser.newPage({viewport:{width:390,height:844}});
+await offlineBrowserAssets(page);
+if(process.env.FORCE_MANUAL_SHARE==='true')await page.addInitScript(()=>{
+  Object.defineProperty(navigator,'share',{value:undefined,configurable:true});
+  Object.defineProperty(navigator,'clipboard',{value:undefined,configurable:true});
+  document.execCommand=()=>false;
+});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+const results=[];
+try {
+  await page.goto(base);await page.locator('.app-shell[data-ready="true"]').waitFor();
+  if(!['127.0.0.1','localhost'].includes(new URL(base).hostname)){
+    const capabilities=await page.evaluate(()=>({secure:isSecureContext,randomUUID:typeof crypto.randomUUID==='function'}));
+    assert.equal(capabilities.secure,false);assert.equal(capabilities.randomUUID,false);
+    results.push('real HTTP LAN origin has no randomUUID; profile and submission flow use the safe fallback');
+  }
+  assert.equal(await page.getByRole('button',{name:'Wuse II, Abuja',exact:true}).getAttribute('aria-pressed'),'true');
+  await page.getByRole('button',{name:'Maitama, Abuja',exact:true}).click();
+  await page.reload();await page.locator('.app-shell[data-ready="true"]').waitFor();
+  assert.equal(await page.getByRole('button',{name:'Maitama, Abuja',exact:true}).getAttribute('aria-pressed'),'true');
+  results.push('fresh sessions default to Wuse II; saved Maitama survives reload');
+  assert.equal(await page.getByRole('button',{name:'Send',exact:true}).isDisabled(),true);
+  await page.getByRole('button',{name:'Your tastes',exact:true}).click();
+  await page.getByRole('button',{name:'Wine',exact:true}).click();
+  await page.getByRole('textbox',{name:'Name',exact:true}).fill('Ada');
+  await page.getByRole('button',{name:'Done',exact:true}).click();
+  await page.reload();await page.locator('.app-shell[data-ready="true"]').waitFor();
+  assert.equal(await page.getByRole('heading',{name:'Ada',exact:true}).count(),1);
+  assert.equal(await page.getByRole('button',{name:'Send',exact:true}).isDisabled(),true);
+  await page.getByRole('button',{name:/^Friend.s tastes$/,exact:true}).click();
+  await page.getByRole('button',{name:'Wine',exact:true}).click();
+  await page.getByRole('button',{name:'Pasta',exact:true}).click();
+  await page.getByRole('group',{name:'Dislikes',exact:true}).getByRole('button',{name:'Fast food',exact:true}).click();
+  await page.getByRole('textbox',{name:'Name',exact:true}).fill('Ben');
+  await page.getByRole('button',{name:'Done',exact:true}).click();
+  await page.getByRole('button',{name:'Shoreditch',exact:true}).click();
+  await page.getByRole('button',{name:'$ Low',exact:true}).click();
+  await page.reload();await page.locator('.app-shell[data-ready="true"]').waitFor();
+  assert.equal(await page.getByRole('heading',{name:'Ada',exact:true}).count(),1);
+  assert.equal(await page.getByRole('heading',{name:'Ben',exact:true}).count(),1);
+  assert.equal(await page.getByRole('button',{name:'Shoreditch',exact:true}).getAttribute('aria-pressed'),'true');
+  assert.equal(await page.getByRole('button',{name:'$ Low',exact:true}).getAttribute('aria-pressed'),'true');
+  const sendButton=page.getByRole('button',{name:'Send',exact:true});
+  const sendBounds=await sendButton.boundingBox();
+  assert.ok(sendBounds && sendBounds.y >= 0 && sendBounds.y+sendBounds.height <= 844 && sendBounds.width >= 44 && sendBounds.height >= 44);
+  results.push('both profiles, location and budget persist; send is reachable on mobile');
+  results.push('partial profile setup persists; likes and dislikes use the existing editor');
+  await page.getByRole('button',{name:'Try example profiles',exact:true}).click();
+  assert.equal(await page.getByRole('heading',{name:'Maya',exact:true}).count(),1);
+  assert.equal(await page.getByRole('heading',{name:'Leo',exact:true}).count(),1);
+  await page.getByRole('button',{name:'Show all tastes for Maya',exact:true}).click();
+  assert.equal(await page.getByText('Quiet',{exact:true}).isVisible(),true);
+  await page.getByRole('button',{name:'Show fewer tastes for Maya',exact:true}).click();
+  assert.equal(await page.getByText('Quiet',{exact:true}).count(),0);
+  results.push('example profiles restore Maya and Leo; hidden taste chips expand and collapse');
+  const venue=(id)=>({id,name:'TEST FIXTURE '+id,where:'London',priceLabel:'Price level $',ratingLabel:null,imageUrl:null,tags:[{name:'Wine',matched:true}],forA:'Matches Wine for Ada.',forB:'Matches Wine for Ben.',shared:'Wine matches both friends.'});
+  let next={ok:true,searchMode:'ai',summary:'TEST FIXTURE shortlist',locationLabel:'Shoreditch',budgetLabel:'$ Low',names:{a:'Ada',b:'Ben'},best:venue('primary'),alternatives:[venue('alternative1'),venue('alternative2')]};
+  let requestCount=0;
+  await page.route('**/_serverFn/**',async route=>{
+    requestCount++;
+    await new Promise(r=>setTimeout(r,700));
+    const payload=await toCrossJSONAsync({result:next,error:undefined,context:{}});
+    await route.fulfill({status:200,headers:{'content-type':'application/json','x-tss-serialized':'true'},body:JSON.stringify(payload)});
+  });
+  await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByText('Looking for a place that suits both of you.',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Send',exact:true}).isDisabled(),true);
+  assert.equal(await page.getByRole('textbox',{name:'Ask for dinner',exact:true}).inputValue(),'');
+  // Repeated Enter while pending must not create another submission.
+  await page.getByRole('textbox',{name:'Ask for dinner',exact:true}).press('Enter');
+  await page.getByRole('heading',{name:'TEST FIXTURE primary',exact:true}).waitFor();
+  assert.equal(await page.getByText('AI-guided search',{exact:true}).count(),1);
+  assert.equal(requestCount,1);
+  assert.equal(await page.locator('article').filter({hasText:'TEST FIXTURE'}).count(),3);
+  await page.waitForFunction(() => {
+    const heading=[...document.querySelectorAll('h3')].find(el=>el.textContent==='TEST FIXTURE primary');
+    const header=document.querySelector('header');
+    return heading && header && heading.getBoundingClientRect().top >= header.getBoundingClientRect().bottom && heading.getBoundingClientRect().bottom < innerHeight-80;
+  });
+  await page.waitForTimeout(500);
+  await page.screenshot({path:'screenshots/flow-success.png'});
+  results.push('loading disables duplicate send; primary plus two alternatives render');
+  await page.getByRole('button',{name:'Share',exact:true}).click();
+  await page.waitForFunction(()=>document.body.innerText.includes('Copied')||!!document.querySelector('textarea[aria-label="Recommendation to copy"]'));
+  if(process.env.FORCE_MANUAL_SHARE==='true'){
+    assert.match(await page.getByRole('textbox',{name:'Recommendation to copy',exact:true}).inputValue(),/TEST FIXTURE primary/);
+  }
+  results.push('Share provides copied text or selectable manual text without secure-context APIs');
+  next={ok:false,code:'empty',message:'TEST FIXTURE no suitable restaurants at this budget.'};
+  // A blank composer still submits the core dinner prompt after a result.
+  assert.equal(await page.getByRole('textbox',{name:'Ask for dinner',exact:true}).inputValue(),'');
+  await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByText(next.message,{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Share',exact:true}).count(),0);
+  results.push('empty state renders with ask-again action');
+  next={ok:false,code:'error',message:'TEST FIXTURE service unavailable. Retry.'};
+  await page.getByRole('button',{name:'Ask again',exact:true}).click();
+  await page.getByText(next.message,{exact:true}).waitFor();
+  next={ok:true,summary:'TEST FIXTURE recovered',locationLabel:'Shoreditch',budgetLabel:'$ Low',names:{a:'Ada',b:'Ben'},best:venue('recovered'),alternatives:[venue('other')]};
+  await page.getByRole('button',{name:'Retry',exact:true}).click();
+  await page.getByRole('heading',{name:'TEST FIXTURE recovered',exact:true}).waitFor();
+  results.push('error and retry recover without clearing profiles');
+  next={...next,searchMode:'profile',instructionNotice:'Your message was not interpreted by AI. Any extra instructions could not be applied; results use only both profiles, the selected location and budget.'};
+  await page.getByRole('textbox',{name:'Ask for dinner',exact:true}).fill('Cheap Thai tonight');
+  await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByText('Profile-based search',{exact:true}).waitFor();
+  assert.equal(await page.getByText(next.instructionNotice,{exact:true}).isVisible(),true);
+  await page.getByRole('button',{name:'Share',exact:true}).click();
+  if(process.env.FORCE_MANUAL_SHARE==='true'){
+    const shared=page.getByRole('textbox',{name:'Recommendation to copy',exact:true});
+    await shared.waitFor();assert.match(await shared.inputValue(),/Profile-based search/);assert.match(await shared.inputValue(),/extra instructions could not be applied/);
+  }
+  results.push('profile fallback is labelled and unapplied message instructions remain visible and shared');
+  next={ok:false,code:'unconfigured',message:'Dining recommendations are unavailable right now. Your profiles are saved. Please try again later.'};
+  await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByText(next.message,{exact:true}).waitFor();
+  assert.equal(await page.getByText(/XAI_API_KEY|QLOO_API_KEY|UPSTASH_REDIS|USAGE_CALLER_SALT/).count(),0);
+  results.push('unconfigured state preserves profiles and shows a simple unavailable message');
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  assert.deepEqual(errors,[]);
+  writeFileSync('screenshots/flow-verdict.json',JSON.stringify({base,results,errors,fixtureOnly:true},null,2));
+  console.log(JSON.stringify({base,results,errors,fixtureOnly:true},null,2));
+} finally {await browser.close();}

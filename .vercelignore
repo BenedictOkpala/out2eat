@@ -1,0 +1,17 @@
+node_modules
+.npm-cache
+.env
+.env.*
+!.env.example
+.vercel
+.output
+screenshots
+artifacts
+.grok/*.log
+.grok/*.pid
+.tanstack
+.node_modules.lock
+
+.grok
+AGENTS.md
+AGENTS.project.md

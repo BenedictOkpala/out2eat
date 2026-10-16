@@ -1,0 +1,25 @@
+node_modules/
+.npm-cache/
+.env
+.env.*
+!.env.example
+.vercel/
+.output/
+dist/
+.grok/*.log
+.grok/*.pid
+
+.tanstack/
+artifacts/
+screenshots/
+test-results/
+playwright-report/
+*.har
+*.log
+*.pid
+
+# Local export/workspace metadata, never public source
+.grok/
+AGENTS.md
+AGENTS.project.md
+.node_modules.lock
