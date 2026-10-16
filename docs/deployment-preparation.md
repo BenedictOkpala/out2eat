@@ -1,13 +1,16 @@
 # GitHub and Vercel release preparation
 
-Target: public GitHub repository https://github.com/BenedictOkpala/out2eat.
+Published public GitHub repository: https://github.com/BenedictOkpala/out2eat.
+Main is pushed; GitHub detects MIT. Remote file paths and committed history were
+checked: no real env/private QA/build paths or configured secrets were found.
+Vercel is not linked and no deployment has been started.
 Current source stays in this project; no ZIP is used. See license-review.md for
 corrected terms: public judging hosting is required, private caching is permitted,
 and provenance alone is not a publication restriction.
 
 ## GitHub
 
-The local main branch is initialized. The repository will contain source,
+The local main branch tracks origin/main. The repository contains source,
 package-lock.json, synthetic tests, .env.example, LICENSE and third-party notices.
 Git uses Benedict Okpala and the verified GitHub account's privacy-preserving
 noreply address. No real env file, QA artifact or build output is committed.

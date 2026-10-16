@@ -43,5 +43,8 @@ The earlier blanket blockers were withdrawn after checking actual public terms.
 Public Qloo judging hosting is required, and private server caching has no
 retention cap. The 32-file inventory is provenance, not proof of a prohibition.
 See license-review.md. The local Git repository is now initialized, and release
-preparation targets BenedictOkpala/out2eat. Current account/import instructions
+preparation published https://github.com/BenedictOkpala/out2eat on main. GitHub
+detects MIT and the remote 89-file tree contains no forbidden private paths.
+The public scan now checks the working tree, index and committed history.
+Vercel account sign-in/import is the next owner action; no deployment was started. Current account/import instructions
 are in deployment-preparation.md. No ZIP or paid provisioning is needed.
