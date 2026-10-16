@@ -9,7 +9,10 @@ recommendation and up to two quieter alternatives. A single qualifying mutual
 match is valid; no mutual match produces an honest empty state.
 
 The React, TanStack Start, Vite and Tailwind UI is preserved. No accounts,
-booking or extra onboarding. Profiles stay in browser storage. Nothing deployed.
+booking or extra onboarding. Profiles stay in browser storage.
+
+Live judging demo: **https://out2eat.vercel.app** (personal Vercel Hobby workspace).
+[Hosted verification](docs/hosted-verification.md) separates UI checks from live API verification.
 
 ## Setup
 
@@ -166,7 +169,8 @@ Unused auth/database/connector implementations, preview bridge/path/provider
 helpers, Grok dev flags and Linux-only preview tooling are outside the public
 source tree. The environment launcher loads private files without platform flags.
 The existing Grok PWA/install/branding group remains intact pending export terms.
-Google Fonts and other remote assets still need internet. Nothing was deployed.
+Google Fonts and other remote assets still need internet. The app is deployed
+at https://out2eat.vercel.app; see the hosted verification report.
 
 ## Licence and public-repository readiness
 

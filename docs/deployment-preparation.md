@@ -3,7 +3,8 @@
 Published public GitHub repository: https://github.com/BenedictOkpala/out2eat.
 Main is pushed; GitHub detects MIT. Remote file paths and committed history were
 checked: no real env/private QA/build paths or configured secrets were found.
-Vercel is not linked and no deployment has been started.
+Vercel is now linked and deployed at https://out2eat.vercel.app on Hobby.
+See hosted-verification.md for verified behavior and remaining live-API checks.
 Current source stays in this project; no ZIP is used. See license-review.md for
 corrected terms: public judging hosting is required, private caching is permitted,
 and provenance alone is not a publication restriction.
@@ -38,7 +39,7 @@ recorded-response patterns. No provider/store calls are part of this check.
    Never paste values into chat/Git and never prefix them VITE_. Keep the same salt
    and shared primary, so deploys do not reset allowances. Groq is needed for AI
    mode; an absent key deliberately uses labelled Profile-based search.
-5. Leave Deploy unclicked until deployment is explicitly authorized. Creating a
+5. Deployment was authorized and completed through the official CLI. Creating a
    custom domain or paid infrastructure is unnecessary. A Vercel project token
    is not needed for this GitHub-import flow.
 6. Once authorized, deploy and use the generated HTTPS URL. Verify profiles,
