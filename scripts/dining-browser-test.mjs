@@ -87,6 +87,18 @@ try {
   await page.waitForTimeout(500);
   await page.screenshot({path:'screenshots/flow-success.png'});
   results.push('loading disables duplicate send; primary plus two alternatives render');
+  await page.getByRole('button',{name:'Edit setup',exact:true}).click();
+  await page.getByRole('button',{name:'Your tastes',exact:true}).click();
+  await page.getByRole('textbox',{name:'Name',exact:true}).fill('Maya edited');
+  await page.getByRole('button',{name:'Done',exact:true}).click();
+  await page.getByRole('button',{name:'Maitama, Abuja',exact:true}).click();
+  await page.getByRole('button',{name:'$$ Mid',exact:true}).click();
+  assert.equal(await page.getByRole('heading',{name:'Maya edited',exact:true}).count(),1);
+  assert.equal(await page.getByRole('button',{name:'Maitama, Abuja',exact:true}).getAttribute('aria-pressed'),'true');
+  assert.equal(await page.getByRole('button',{name:'$$ Mid',exact:true}).getAttribute('aria-pressed'),'true');
+  await page.getByRole('button',{name:'Back to dinner',exact:true}).click();
+  assert.equal(await page.getByRole('heading',{name:'TEST FIXTURE primary',exact:true}).isVisible(),true);
+  results.push('Edit setup reopens after results; profile, location and budget remain editable');
   await page.getByRole('button',{name:'Share',exact:true}).click();
   await page.waitForFunction(()=>document.body.innerText.includes('Copied')||!!document.querySelector('textarea[aria-label="Recommendation to copy"]'));
   if(process.env.FORCE_MANUAL_SHARE==='true'){

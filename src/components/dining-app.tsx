@@ -111,6 +111,8 @@ export function DiningApp() {
   const [shareNote, setShareNote] = useState("");
   const [manualShare, setManualShare] = useState("");
   const lock = useRef(false);
+  const requestVersion = useRef(0);
+  const setupRef = useRef<HTMLDivElement>(null);
   const lastRequest = useRef<DinnerRequest | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -177,6 +179,7 @@ export function DiningApp() {
     const text = message.trim();
     if (!text || lock.current || !a.likes.length || !b.likes.length) return;
     lock.current = true;
+    const version = ++requestVersion.current;
     const request = buildRequest(text);
     lastRequest.current = request;
     setPending(true);
@@ -190,7 +193,9 @@ export function DiningApp() {
     ]);
     try {
       const response = await ask({ data: request });
+      if (version !== requestVersion.current) return;
       setThread((current) => {
+        if (version !== requestVersion.current) return current;
         const next = current.filter((item) => item.kind !== "loading");
         if (response.ok) {
           next.push({ id: createUiId(), kind: "result", result: response });
@@ -202,7 +207,9 @@ export function DiningApp() {
         return next;
       });
     } catch {
+      if (version !== requestVersion.current) return;
       setThread((current) => {
+        if (version !== requestVersion.current) return current;
         const next = current.filter((item) => item.kind !== "loading");
         next.push({
           id: createUiId(),
@@ -212,9 +219,27 @@ export function DiningApp() {
         return next;
       });
     } finally {
-      lock.current = false;
-      setPending(false);
+      if (version === requestVersion.current) {
+        lock.current = false;
+        setPending(false);
+      }
     }
+  };
+
+  const returnToSetup = () => {
+    // Ignore a late success/error/finally from the abandoned UI request. This
+    // does not cancel provider work already admitted on the server or refund it.
+    requestVersion.current++;
+    lock.current = false;
+    setPending(false);
+    setThread(current => current.filter(item => item.kind !== "loading"));
+    setShareNote("");
+    setManualShare("");
+    setSetupOpen(true);
+    requestAnimationFrame(() => {
+      contentRef.current?.scrollTo({ top: 0, behavior: "instant" });
+      setupRef.current?.focus({ preventScroll: true });
+    });
   };
 
   const retry = () => {
@@ -229,6 +254,7 @@ export function DiningApp() {
 
   const onShare = async () => {
     if (!latestResult || latestResult.kind !== "result") return;
+    const version = requestVersion.current;
     const text = shareText(latestResult.result);
     setManualShare("");
     try {
@@ -239,11 +265,14 @@ export function DiningApp() {
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") return;
     }
+    if (version !== requestVersion.current) return;
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
       await navigator.clipboard.writeText(text);
+      if (version !== requestVersion.current) return;
       setShareNote("Copied");
     } catch {
+      if (version !== requestVersion.current) return;
       const field = document.createElement("textarea");
       field.value = text;
       field.readOnly = true;
@@ -262,13 +291,18 @@ export function DiningApp() {
   return (
     <div className="app-shell" data-ready={ready}>
       <header className="flex shrink-0 items-center gap-3 px-4 py-3">
-        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-accent text-primary">
-          <Utensils className="size-5" aria-hidden="true" />
-        </span>
-        <div className="min-w-0">
-          <h1 className="font-display text-2xl leading-none">Out2Eat</h1>
-          <p className="mt-1 text-sm text-muted">Dinner for two</p>
-        </div>
+        <h1 className="min-w-0" aria-label="Out2Eat">
+          <button type="button" onClick={returnToSetup} aria-label="Out2Eat ? return to setup"
+            className="flex min-w-0 items-center gap-3 rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-accent text-primary">
+              <Utensils className="size-5" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block font-display text-2xl leading-none">Out2Eat</span>
+              <span className="mt-1 block text-sm font-normal text-muted">Dinner for two</span>
+            </span>
+          </button>
+        </h1>
       </header>
 
       <div ref={contentRef} className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pt-2 pb-6">
@@ -276,7 +310,7 @@ export function DiningApp() {
           <p className="min-w-0 break-words text-sm"><span className="block font-semibold">{lastRequest.current?.a.name ?? a.name} &amp; {lastRequest.current?.b.name ?? b.name}</span>{locationSearchLabel(lastRequest.current?.location ?? location)} · {budgetById(lastRequest.current?.budget ?? budget).label} {budgetById(lastRequest.current?.budget ?? budget).hint}</p>
           <Button variant="quiet" disabled={pending} onClick={() => setSetupOpen(true)}>Edit setup</Button>
         </section>}
-        <div hidden={!setupOpen} className={setupOpen ? "flex flex-col gap-6" : "hidden"}>
+        <div ref={setupRef} tabIndex={-1} aria-label="Dinner setup" hidden={!setupOpen} className={setupOpen ? "flex flex-col gap-6 outline-none" : "hidden"}>
         {thread.length > 0 && <Button variant="quiet" onClick={() => setSetupOpen(false)}>Back to dinner</Button>}
         <section className="flex flex-col gap-3" aria-label="Dining profiles">
           <h2 className="text-sm font-medium text-muted">Who's eating</h2>
