@@ -64,7 +64,10 @@ When a limit rejects, server diagnostics include `limiter` and an absolute UTC
 `resetAt` timestamp, without caller identity or credential values. IDs distinguish
 `caller.minute` (3/60 seconds), `caller.day` (20/24 hours),
 `provider.model.day` (100/24 hours), `provider.qloo.day` (300/24 hours) and
-`provider.qloo.spacing` (one/2 seconds). Windows begin at their first reservation,
+`provider.qloo.spacing` (one/2 seconds). Qloo spacing contention waits for atomic admission (up to eight
+waits inside 15 seconds), rather than failing a normal multi-call search. Daily
+caps and provider cooldowns still reject. Local and production share global
+provider budgets/cooldowns; their caller identities differ. Windows begin at their first reservation,
 not midnight. The old generic message did not record a specific window/reset;
 its historical timestamp cannot be recovered from process-local state after HMR
 or restart. This change does not reset shared production counters.
@@ -195,3 +198,6 @@ files and committed blobs without printing secrets. See
 [deployment preparation](docs/deployment-preparation.md) for exact GitHub/Vercel
 steps and server environment variables. No ZIP, paid infrastructure or new
 product feature is needed.
+
+The [production spacing fix](docs/production-limit-fix.md) was verified with one
+real hosted Groq-to-Qloo search. Restaurant evidence and raw QA records stay private.

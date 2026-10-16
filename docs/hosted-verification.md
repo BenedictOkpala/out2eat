@@ -2,7 +2,7 @@
 
 Public production URL: https://out2eat.vercel.app
 Project: out2eat; personal default workspace signalpilot (slug signalpilot2),
-confirmed Hobby. Deployed application commit: 80f7ded.
+confirmed Hobby. Header commit: 80f7ded. The subsequent production spacing fix e3d6cc5 is deployed.
 
 Vercel's Linux build installed the lockfile, passed TypeScript and built the
 existing React/TanStack Start/Vite/Tailwind app with Nitro's Node 24 runtime.
@@ -23,11 +23,11 @@ pending. These are labelled QA-only synthetic results, not live restaurants.
 No live Groq or Qloo requests were made during hosted verification. No completed
 shared-store verification was repeated.
 
-Still unverified on Vercel: an authenticated Groq -> Qloo -> ranked-results
-request and production trusted caller identity/end-to-end usage admission.
-Those paths were previously verified locally, but the synthetic hosted checks
-cannot establish them. Native sharing is device-dependent and was not exercised
-on a physical phone in this hosted pass.
+A subsequent controlled hosted verification confirmed real Groq -> Qloo -> ranked
+results in AI mode (one submission, 4192 ms); see production-limit-fix.md. Public
+caller/global protections remain enabled and no shared counters were reset.
+Native sharing on a physical phone and deliberate trusted-header spoof testing
+were not exercised. The single result does not establish universal dining quality.
 
 Deployment used the official Vercel CLI from this source tree. GitHub main is
 pushed; automatic Vercel deployments from future GitHub pushes are not connected.
